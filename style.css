@@ -1,0 +1,27 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #172727;
+}
+
+#play {
+    position: absolute;
+    top: 80%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 80px;
+    border: none;
+    color: white;
+    background-color: #00FF66;
+    border-radius: 50%;
+    box-shadow: 0 0 12px #00FF66;
+}
+
+#play:focus {
+    outline: none
+}
