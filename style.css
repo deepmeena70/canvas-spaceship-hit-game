@@ -32,7 +32,6 @@ body {
     height: 60px;
     top: 82%;
     right: 20%;
-    /* background-color: #00FF66; */
     box-shadow: inset 0 0 12px #00FF66;
     border-radius: 40px;
     text-align: center;
@@ -40,4 +39,19 @@ body {
     color: #FFFF00;
     text-shadow: 0 0 6px #FFFF00;
     font-size: 28px;
+}
+
+#power {
+    position: absolute;
+    width: 160px;
+    height: 160px;
+    color: #FFFF00;
+    text-shadow: 0 0 6px #FFFF00;
+    font-size: 28px;
+    top: 72%;
+    left: 20%;
+    box-shadow: inset 0 0 12px #FFFF00;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 160px;
 }

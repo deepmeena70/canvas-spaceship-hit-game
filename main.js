@@ -192,15 +192,26 @@ function activateLaser(px, py) {
 }
 
 let count = 0;
+let power = 0;
 
 function collision() {
     for (let i = 0; i < laserArray.length; i++) {
         let dx = laserArray[i].x - obstaclesArray[i].x;
         let dy = laserArray[i].y - obstaclesArray[i].y;
         let distance = Math.sqrt(dx * dx + dy * dy);
-        if (distance <= laserArray[i].radius + obstaclesArray[i].radius && obstaclesArray[i].radius > 5) {
+        if (distance <= laserArray[i].radius + obstaclesArray[i].radius) {
+            if (obstaclesArray[i].radius > 15)
+                document.getElementById("points").innerHTML = Math.floor(count += obstaclesArray[i].radius);
+
+            if (obstaclesArray[i].radius > 5) {
+                if (power <= 100) {
+                    power += Math.floor(obstaclesArray[i].radius * 0.2);
+                    document.getElementById("power").innerHTML = power + " %";
+                }
+                document.getElementById("power").style.boxShadow = "inset 0 0 " + power + "px #FFFF00";
+            }
+
             obstaclesArray[i].radius = 0;
-            document.getElementById("points").innerHTML = count++;
         }
     }
 
@@ -208,13 +219,10 @@ function collision() {
 
 
 
-
-
 action();
 
 function action() {
     window.addEventListener('keydown', (e) => {
-        // ship(x, y);
         switch (e.key) {
             case "d":
                 {
@@ -238,11 +246,15 @@ function action() {
                 }
             case "q":
                 {
-                    for (let i = 0; i < laserArray.length; i++) {
-                        laserArray[i].x = spaceShip1.x + 90;
-                        if (laserArray[i].x < 300) {
-                            laserArray[i].radius += 1.25;
+                    if (power >= 100) {
+                        for (let i = 0; i < laserArray.length; i++) {
+                            laserArray[i].x = spaceShip1.x + 90;
+                            if (laserArray[i].x < 300) {
+                                laserArray[i].radius = power * 2;
+                                power = 0;
+                            }
                         }
+
 
                     }
                 }
