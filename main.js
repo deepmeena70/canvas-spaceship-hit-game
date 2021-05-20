@@ -3,159 +3,266 @@ const ctx = canvas.getContext('2d');
 canvas.width = innerWidth;
 canvas.height = innerHeight;
 
-let x = 180;
-let y = 75;
-let gas = 0;
-let strokeSize1 = 2;
-let strokeSize2 = 2;
 let raf;
 
 
-function ship(x, y) {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.beginPath();
-    ctx.arc(x, y, 15, (Math.PI / 180) * 80, (Math.PI / 180) * 280, true);
-    ctx.lineTo(x - 120, y + 5);
-    ctx.arc(x, y, 15, (Math.PI / 180) * 80, (Math.PI / 180) * 280, true);
-    ctx.arc(x, y, 10, (Math.PI / 180) * 80, (Math.PI / 180) * 280, true);
-    ctx.shadowBlur = 2;
-    ctx.shadowColor = "#00FF66";
-    ctx.lineWidth = strokeSize1;
-    ctx.fillStyle = "#00FF00";
-    ctx.strokeStyle = '#8A2BE2';
-    ctx.fill();
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(x - 100, y, 30, (Math.PI / 180) * 80, (Math.PI / 180) * 280, true);
-    ctx.lineTo(x - 70 * 2 + gas, y + 5);
-    ctx.arc(x - 100, y, 30, (Math.PI / 180) * 80, (Math.PI / 180) * 280, true);
-    ctx.lineWidth = strokeSize2;
-    ctx.shadowAlpha = 5;
-    ctx.shadowBlur = 8 * Math.random() + 15;
-    ctx.shadowColor = "#FF6600";
-    ctx.strokeStyle = '#FF6600';
-    ctx.fillStyle = '#8A2BE2';
-    ctx.fill();
-    ctx.stroke();
-
-}
-
-let numberOfObstacles = 20;
+let numberOfParticles = 20;
 let obstaclesArray = [];
+let laserArray = [];
+
+class spaceShip {
+    constructor() {
+        this.x = 180;
+        this.y = 75;
+        this.radius = 2;
+        this.strokeSize1 = 2;
+        this.strokeSize2 = 2;
+        this.gas = 0;
+        this.spaceShipShadowBlur = 7;
+        this.color = ['#00FF66', '#00FF00', '#8A2BE2', '#FF6600', '#8A2BE2', '#FFFF00'];
+        this.flameShadowAlpha = 5;
+        this.flameShadowBlur = 25;
+        this.px = 0;
+        this.py = 0;
+    }
+    update() {
+        this.flameShadowBlur = 40 * Math.random() + 25;
+    }
+    left() {
+        if (this.x < innerWidth - 200) {
+            this.x += 10;
+            this.gas--;
+            if (this.x < innerWidth - 1200)
+                this.strokeSize2++;
+
+        }
+    }
+    right() {
+        if (this.x > 180) {
+
+            this.x -= 10;
+            this.gas++;
+            if (this.x < 200)
+                this.strokeSize2 = 2;
+            this.strokeSize2--;
+        }
+    }
+    up() {
+        if (this.y > 100)
+            this.y -= 10;
+    }
+    down() {
+        if (this.y < innerHeight - 200)
+            this.y += 10;
+    }
+
+
+    updateLaser() {
+        this.x += Math.random() * 40;
+        if (this.x > innerWidth) {
+            this.x = this.px;
+            this.y = this.py;
+            this.radius = 2;
+        }
+        if (this.x <= innerWidth)
+            this.radius += 0.2;
+    }
+
+    drawLaser() {
+        ctx.beginPath();
+        ctx.arc(this.x + 10, this.y, this.radius, 0, Math.PI * 2, true);
+        ctx.fillStyle = this.color[Math.floor(Math.random() * 5)];
+        ctx.fill();
+    }
+
+    drawSpaceship() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius + 13, (Math.PI / 180) * 80, (Math.PI / 180) * 280, true);
+        ctx.lineTo(this.x - 120, this.y + 5);
+        ctx.arc(this.x, this.y, this.radius + 13, (Math.PI / 180) * 80, (Math.PI / 180) * 280, true);
+        ctx.arc(this.x, this.y, this.radius + 8, (Math.PI / 180) * 80, (Math.PI / 180) * 280, true);
+        ctx.shadowBlur = this.spaceShipShadowBlur;
+        ctx.shadowColor = this.color[0];
+        ctx.lineWidth = this.strokeSize1;
+        ctx.fillStyle = this.color[1];
+        ctx.strokeStyle = this.color[2];
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(this.x - 100, this.y, this.radius + 28, (Math.PI / 180) * 80, (Math.PI / 180) * 280, true);
+        ctx.lineTo(this.x - 70 * 2 + this.gas, this.y + 5);
+        ctx.arc(this.x - 100, this.y, this.radius + 28, (Math.PI / 180) * 80, (Math.PI / 180) * 280, true);
+        ctx.lineWidth = this.strokeSize2;
+        ctx.shadowAlpha = this.flameShadowAlpha;
+        ctx.shadowBlur = this.flameShadowBlur;
+        ctx.shadowColor = this.color[3];
+        ctx.strokeStyle = this.color[3];
+        ctx.fillStyle = this.color[4];
+        ctx.fill();
+        ctx.stroke();
+    }
+}
 
 class Obstacle {
     constructor() {
         this.x = Math.random() * canvas.width;
         this.y = Math.random() * canvas.height;
         this.speed = 2;
-        this.size = 20 * Math.random() + 3;
-        this.color = ['#FF00FF', '#FFFF00', '#FF3300'];
-        this.colorPick = 0;
+        this.radius = 40 * Math.random();
+        this.color = ['#FF00FF', '#FFFF00', '#FF3300', '#A5D8F3'];
 
     }
     update() {
         this.x -= this.speed;
         if (this.x < 0) {
             this.x = innerWidth;
+            this.radius = 40 * Math.random();
         }
     }
     draw() {
         ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
         ctx.fillStyle = this.color[2];
-        if (this.size < 15) {
+        if (this.radius < 20) {
             ctx.fillStyle = this.color[1];
         }
-        if (this.size < 8) {
+        if (this.radius < 8) {
+            ctx.fillStyle = this.color[3];
+        }
+
+        if (this.radius < 5) {
             ctx.fillStyle = this.color[0];
         }
         ctx.fill();
-        ctx.shadowBlur = 16;
+        ctx.shadowBlur = 10;
         ctx.shadowColor = "#FF6600";
         ctx.closePath();
     }
+
 }
 
+
 function init() {
-    for (let i = 0; i < numberOfObstacles; i++) {
+    for (let i = 0; i < numberOfParticles; i++) {
         obstaclesArray.push(new Obstacle());
+    }
+    for (let i = 0; i < numberOfParticles; i++) {
+        laserArray.push(new spaceShip());
     }
 }
 
 init();
+let spaceShip1 = new spaceShip();
+
+
+
 
 
 function animate() {
-
-    ship(x, y);
-
+    ctx.clearRect(0, 0, innerWidth, innerHeight);
+    spaceShip1.drawSpaceship();
+    spaceShip1.update();
+    let px = spaceShip1.x;
+    let py = spaceShip1.y;
     for (let i = 0; i < obstaclesArray.length; i++) {
 
         obstaclesArray[i].update();
         obstaclesArray[i].draw();
 
+
     }
+
+    collision();
+
+
+    activateLaser(px, py);
 
 
     raf = requestAnimationFrame(animate);
 }
 
-animate();
-
-
-window.addEventListener('keydown', (e) => {
-    ship(x, y);
-    switch (e.key) {
-        case "d":
-            {
-                if (x < innerWidth - 200) {
-                    x += 10;
-                    gas--;
-                    if (x < innerWidth - 1200)
-                        strokeSize2++;
-
-                }
-                break;
-            }
-        case "a":
-            {
-                if (x > 180) {
-
-                    x -= 10;
-                    gas++;
-                    if (x < 200)
-                        strokeSize2 = 2;
-                    strokeSize2--;
-                }
-                break;
-            }
-        case "w":
-            {
-                if (y > 100)
-                    y -= 10;
-                break;
-            }
-        case "s":
-            {
-                if (y < innerHeight - 200)
-                    y += 10;
-                break;
-            }
+function activateLaser(px, py) {
+    for (let i = 0; i < laserArray.length; i++) {
+        laserArray[i].px = px;
+        laserArray[i].py = py;
+        laserArray[i].drawLaser();
+        laserArray[i].updateLaser();
     }
 
-});
+}
+
+let count = 0;
+
+function collision() {
+    for (let i = 0; i < laserArray.length; i++) {
+        let dx = laserArray[i].x - obstaclesArray[i].x;
+        let dy = laserArray[i].y - obstaclesArray[i].y;
+        let distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance <= laserArray[i].radius + obstaclesArray[i].radius && obstaclesArray[i].radius > 5) {
+            obstaclesArray[i].radius = 0;
+            document.getElementById("points").innerHTML = count++;
+        }
+    }
+
+}
+
+
+
+
+
+action();
+
+function action() {
+    window.addEventListener('keydown', (e) => {
+        // ship(x, y);
+        switch (e.key) {
+            case "d":
+                {
+                    spaceShip1.left();
+                    break;
+                }
+            case "a":
+                {
+                    spaceShip1.right();
+                    break;
+                }
+            case "w":
+                {
+                    spaceShip1.up();
+                    break;
+                }
+            case "s":
+                {
+                    spaceShip1.down();
+                    break;
+                }
+            case "q":
+                {
+                    for (let i = 0; i < laserArray.length; i++) {
+                        laserArray[i].x = spaceShip1.x + 90;
+                        if (laserArray[i].x < 300) {
+                            laserArray[i].radius += 1.25;
+                        }
+
+                    }
+                }
+        }
+
+    });
+}
+
+
 
 const playBtn = document.getElementById("play");
 let playStatus = 0;
 playBtn.addEventListener("click", (e) => {
     if (playStatus == 0) {
-
-        cancelAnimationFrame(raf);
+        animate();
         playStatus = 1;
         playBtn.innerHTML = "Play";
     } else {
         playStatus = 0;
-        animate();
+        cancelAnimationFrame(raf);
         playBtn.innerHTML = "Stop";
     }
 
