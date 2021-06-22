@@ -206,7 +206,10 @@ function collision() {
             if (obstaclesArray[i].radius > 5) {
                 if (power <= 100) {
                     power += Math.floor(obstaclesArray[i].radius * 0.2);
-                    document.getElementById("power").innerHTML = power + " %";
+                    if (power > 100) {
+                        power = 100;
+                    }
+                    document.getElementById("power").innerHTML = Math.round(power) + " %";
                 }
                 document.getElementById("power").style.boxShadow = "inset 0 0 " + power + "px #FFFF00";
             }
@@ -246,13 +249,11 @@ function action() {
                 }
             case "q":
                 {
-                    if (power >= 100) {
+                    if (power == 100) {
                         for (let i = 0; i < laserArray.length; i++) {
                             laserArray[i].x = spaceShip1.x + 90;
-                            if (laserArray[i].x < 300) {
-                                laserArray[i].radius = power * 2;
-                                power = 0;
-                            }
+                            laserArray[i].radius = power * 2;
+                            power = 0;
                         }
 
 
